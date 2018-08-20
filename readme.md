@@ -2,7 +2,6 @@
 
 
 [![npm version](https://img.shields.io/npm/v/softin-umeng-open-api.svg?style=flat-square)](https://www.npmjs.com/package/softin-umeng-open-api)
-[![Build Status](https://travis-ci.org/cf-L/softin-umeng-open-api.svg?branch=master)](https://travis-ci.org/cf-L/softin-umeng-open-api)
 
 ### Description
 
