@@ -1,45 +1,69 @@
 'use strict'
 
 const Restrict = require('./lib/restrict')
+const Cookie = require('./lib/cookie')
+
 const superagent = require('superagent')
-
-const Api = {
-  token: '/authorize',
-  app: {
-    list: '/apps',
-    count: '/apps/count'
-  },
-  data: {
-    channels: '/channels',
-    versions: '/versions',
-    today: '/today_data',
-    yesterday: '/yesterday_data',
-    anyDate: '/base_data',
-    segmentations: '/segmentations',
-    newUsers: '/new_users',
-    activeUsers: '/active_users',
-    launches: '/launches',
-    durations: '/durations',
-    retentions: '/retentions'
-  },
-  event: {
-    groupList: '/events/group_list',
-    eventList: '/events/event_list',
-    dailyData: '/events/daily_data',
-    parameterList: '/events/parameter_list',
-    parameterData: '/events/parameter_data'
-  },
-  feedback: '/feedbacks'
-}
-
-const UMENGPERIOD = {
-  HOURLY: 'hourly',
-  DAILY: 'daily',
-  WEEKLY: 'weekly',
-  MONTHLY: 'monthly'
-}
+const format = require('util').format
 
 class Umeng {
+  static get Api() {
+    return {
+      token: '/authorize',
+      app: {
+        list: '/apps',
+        count: '/apps/count'
+      },
+      data: {
+        channels: '/channels',
+        versions: '/versions',
+        today: '/today_data',
+        yesterday: '/yesterday_data',
+        anyDate: '/base_data',
+        segmentations: '/segmentations',
+        newUsers: '/new_users',
+        activeUsers: '/active_users',
+        launches: '/launches',
+        durations: '/durations',
+        retentions: '/retentions'
+      },
+      event: {
+        groupList: '/events/group_list',
+        eventList: '/events/event_list',
+        dailyData: '/events/daily_data',
+        parameterList: '/events/parameter_list',
+        parameterData: '/events/parameter_data'
+      },
+      feedback: '/feedbacks',
+      summary: 'http://mobile.umeng.com/ht/api/v3/app/whole/summary?view=summary&relatedId=%s',
+      retentionsDetail: 'http://mobile.umeng.com/ht/api/v3/app/retention/view?relatedId=%s'
+    }
+  }
+
+  static get UMENGPERIOD() {
+    return {
+      HOURLY: 'hourly',
+      DAILY: 'daily',
+      WEEKLY: 'weekly',
+      MONTHLY: 'monthly',
+      DAILYPERLAUNCH: 'daily_per_launch'
+    }
+  }
+
+  static get RETENTIONS() {
+    return {
+      TYPE: {
+        NEW: 'newUser',
+        ACTIVE: 'activeUser'
+      },
+      UNIT: {
+        DAILY: 'day',
+        WEEKLY: 'week',
+        MONTHLY: 'month'
+      }
+    }
+  }
+
   constructor(email, password) {
     if (!email) {
       throw Error('User email required')
@@ -51,6 +75,16 @@ class Umeng {
 
     this.email = email
     this.password = password
+    this.cookie = new Cookie()
+  }
+
+  async getCookie() {
+    if (!this.email || !this.password) {
+      throw Error('User email and password are required')
+    }
+
+    const cookie = await this.cookie.get(this.email, this.password)
+    return cookie
   }
 
   async token() {
@@ -82,13 +116,15 @@ class Umeng {
       if (!this.userInfoCorrect) { return null }
 
       await Restrict.wait()
-      let link = this.host + Api.app.list + `?per_page=${limit || 20}&page=${page || 1}`
+      let link = this.host + Umeng.Api.app.list + `?per_page=${limit || 20}&page=${page || 1}`
 
       if (query) {
         link += `&q=${query}`
       }
 
-      const res = await superagent.get(link).auth(this.email, this.password)
+      const res = await superagent.get(link)
+        .auth(this.email, this.password)
+        .timeout(1000 * 20)
 
       return JSON.parse(res.text)
     } catch (error) {
@@ -101,8 +137,12 @@ class Umeng {
       if (!this.userInfoCorrect) { return null }
 
       await Restrict.wait()
-      const link = this.host + Api.app.count
-      const res = await superagent.get(link).auth(this.email, this.password)
+      const link = this.host + Umeng.Api.app.count
+
+      const res = await superagent.get(link)
+        .auth(this.email, this.password)
+        .timeout(1000 * 20)
+
       const result = JSON.parse(res.text)
 
       return result.count || 0
@@ -116,8 +156,12 @@ class Umeng {
       if (!this.userInfoCorrect) { return null }
 
       await Restrict.wait()
-      const link = this.host + Api.data.today + `?appkey=${appKey}`
-      const res = await superagent.get(link).auth(this.email, this.password)
+      const link = this.host + Umeng.Api.data.today + `?appkey=${appKey}`
+
+      const res = await superagent.get(link)
+        .auth(this.email, this.password)
+        .timeout(1000 * 20)
+
       const result = JSON.parse(res.text)
 
       return result
@@ -131,8 +175,12 @@ class Umeng {
       if (!this.userInfoCorrect) { return null }
 
       await Restrict.wait()
-      const link = this.host + Api.data.yesterday + `?appkey=${appKey}`
-      const res = await superagent.get(link).auth(this.email, this.password)
+      const link = this.host + Umeng.Api.data.yesterday + `?appkey=${appKey}`
+
+      const res = await superagent.get(link)
+        .auth(this.email, this.password)
+        .timeout(1000 * 20)
+
       const result = JSON.parse(res.text)
 
       return result
@@ -146,8 +194,12 @@ class Umeng {
       if (!this.userInfoCorrect) { return null }
 
       await Restrict.wait()
-      const link = this.host + Api.data.anyDate + `?appkey=${appKey}&date=${date}`
-      const res = await superagent.get(link).auth(this.email, this.password)
+      const link = this.host + Umeng.Api.data.anyDate + `?appkey=${appKey}&date=${date}`
+
+      const res = await superagent.get(link)
+        .auth(this.email, this.password)
+        .timeout(1000 * 20)
+
       const result = JSON.parse(res.text)
 
       return result
@@ -157,27 +209,90 @@ class Umeng {
   }
 
   async newUsers(appKey, start, end, period) {
-    return await this._appData(Api.data.newUsers, appKey, start, end, period)
+    if (period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
+      throw Error('Unsupported period!')
+    }
+    return await this._appData(Umeng.Api.data.newUsers, appKey, start, end, period)
   }
 
   async activeUsers(appKey, start, end, period) {
-    return await this._appData(Api.data.activeUsers, appKey, start, end, period)
+    if (period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
+      throw Error('Unsupported period!')
+    }
+    return await this._appData(Umeng.Api.data.activeUsers, appKey, start, end, period)
   }
 
   async launches(appKey, start, end, period) {
-    return await this._appData(Api.data.launches, appKey, start, end, period)
-  }
-
-  async durations(appKey, start, end, period) {
-    return await this._appData(Api.data.durations, appKey, start, end, period)
+    if (period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
+      throw Error('Unsupported period!')
+    }
+    return await this._appData(Umeng.Api.data.launches, appKey, start, end, period)
   }
 
   async retentions(appKey, start, end, period) {
-    if (period === UMENGPERIOD.HOURLY) {
-      throw Error(`Period type of hourly is unavailable for retentions api`)
+    if (period === Umeng.UMENGPERIOD.HOURLY || period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
+      throw Error('Unsupported period!')
     }
 
-    return await this._appData(Api.data.retentions, appKey, start, end, period)
+    return await this._appData(Umeng.Api.data.retentions, appKey, start, end, period)
+  }
+
+  async durations(appKey, start, end, period) {
+    if (period === Umeng.UMENGPERIOD.DAILY || period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
+      return await this._appData(Umeng.Api.data.durations, appKey, start, end, period)
+    } else {
+      throw Error('Unsupported period!')
+    }
+  }
+
+  async summary(appKey) {
+    try {
+      const link = format(Umeng.Api.summary, appKey)
+      const res = await superagent.get(link).timeout(1000 * 20)
+      return JSON.parse(res.text)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async retentionsDetail(appKey, start, end, type, unit, page, limit) {
+    if (!Umeng.RETENTIONS.TYPE[type]) {
+      throw Error(`Unsupported type: ${type}`)
+    }
+
+    if (!Umeng.RETENTIONS.UNIT[unit]) {
+      throw Error(`Unsupported unit: ${unit}`)
+    }
+
+    try {
+      const link = format(Umeng.Api.retentionsDetail, appKey)
+
+      const res = await superagent.post(link)
+        .send({
+          fromDate: start,
+          toDate: end,
+          timeUnit: unit,
+          page: page,
+          pageSize: limit,
+          type: type,
+          view: 'retention',
+          channel: [],
+          version: [],
+          relatedId: appKey
+        })
+        .timeout(1000 * 20)
+
+      const result = JSON.parse(res.text)
+
+      if (result.sCode && result.sCode === 200) {
+        return result.data
+      } else {
+        const message = result.sMsg || result.msg || 'Unknow error'
+        throw Error(message)
+      }
+    } catch (error) {
+      throw error
+    }
   }
 
   get userInfoCorrect() {
@@ -200,9 +315,10 @@ class Umeng {
         link += `&period_type=${period}`
       }
 
-      console.log(link)
+      const res = await superagent.get(link)
+        .auth(this.email, this.password)
+        .timeout(1000 * 20)
 
-      const res = await superagent.get(link).auth(this.email, this.password)
       const result = JSON.parse(res.text)
 
       return result
@@ -211,7 +327,5 @@ class Umeng {
     }
   }
 }
-
-Umeng.UMENGPERIOD = UMENGPERIOD
 
 module.exports = Umeng
