@@ -155,7 +155,7 @@ class Umeng {
     try {
       if (!this.userInfoCorrect) { return null }
 
-      let link = this.host + Umeng.Api.data.versions + `?apKey=${appKey}`
+      let link = this.host + Umeng.Api.data.versions + `?appKey=${appKey}`
 
       if (date !== undefined) {
         link += `&date=${date}`
