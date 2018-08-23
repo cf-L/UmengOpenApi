@@ -151,6 +151,24 @@ class Umeng {
     }
   }
 
+  async versions(appKey, date) {
+    try {
+      if (!this.userInfoCorrect) { return null }
+
+      let link = this.host + Umeng.Api.data.versions + `?apKey=${appKey}`
+
+      if (date !== undefined) {
+        link += `&date=${date}`
+      }
+
+      await Restrict.wait()
+      const res = await superagent.get(link).auth(this.email, this.password)
+      return JSON.parse(res.text)
+    } catch (error) {
+      throw error
+    }
+  }
+
   async todayData(appKey) {
     try {
       if (!this.userInfoCorrect) { return null }
@@ -208,38 +226,38 @@ class Umeng {
     }
   }
 
-  async newUsers(appKey, start, end, period) {
+  async newUsers(appKey, start, end, parameters) {
     if (period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
       throw Error('Unsupported period!')
     }
-    return await this._appData(Umeng.Api.data.newUsers, appKey, start, end, period)
+    return await this._appData(Umeng.Api.data.newUsers, appKey, start, end, parameters)
   }
 
-  async activeUsers(appKey, start, end, period) {
+  async activeUsers(appKey, start, end, parameters) {
     if (period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
       throw Error('Unsupported period!')
     }
-    return await this._appData(Umeng.Api.data.activeUsers, appKey, start, end, period)
+    return await this._appData(Umeng.Api.data.activeUsers, appKey, start, end, parameters)
   }
 
-  async launches(appKey, start, end, period) {
+  async launches(appKey, start, end, parameters) {
     if (period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
       throw Error('Unsupported period!')
     }
-    return await this._appData(Umeng.Api.data.launches, appKey, start, end, period)
+    return await this._appData(Umeng.Api.data.launches, appKey, start, end, parameters)
   }
 
-  async retentions(appKey, start, end, period) {
+  async retentions(appKey, start, end, parameters) {
     if (period === Umeng.UMENGPERIOD.HOURLY || period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
       throw Error('Unsupported period!')
     }
 
-    return await this._appData(Umeng.Api.data.retentions, appKey, start, end, period)
+    return await this._appData(Umeng.Api.data.retentions, appKey, start, end, parameters)
   }
 
-  async durations(appKey, start, end, period) {
+  async durations(appKey, start, end, parameters) {
     if (period === Umeng.UMENGPERIOD.DAILY || period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
-      return await this._appData(Umeng.Api.data.durations, appKey, start, end, period)
+      return await this._appData(Umeng.Api.data.durations, appKey, start, end, parameters)
     } else {
       throw Error('Unsupported period!')
     }
@@ -304,15 +322,19 @@ class Umeng {
     return 'http://api.umeng.com'
   }
 
-  async _appData(api, appKey, start, end, period) {
+  async _appData(api, appKey, start, end, parameters) {
     try {
       if (!this.userInfoCorrect) { return null }
 
       await Restrict.wait()
       let link = this.host + api + `?appkey=${appKey}&start_date=${start}&end_date=${end}`
 
-      if (period) {
-        link += `&period_type=${period}`
+      if (parameters.period) {
+        link += `&period_type=${parameter.period}`
+      }
+
+      if (parameters.versions) {
+        link += `&versions=${parameters.versions}`
       }
 
       const res = await superagent.get(link)
