@@ -331,7 +331,7 @@ class Umeng {
       let link = this.host + api + `?appkey=${appKey}&start_date=${start}&end_date=${end}`
 
       if (parameters && parameters.period) {
-        link += `&period_type=${parameter.period}`
+        link += `&period_type=${parameters.period}`
       }
 
       if (parameters && parameters.versions) {
