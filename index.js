@@ -97,7 +97,7 @@ class Umeng {
         .send({
           email: this.email,
           password: this.password
-        }).timeout(1000 * 20)
+        }).timeout(1000 * 60)
 
       const result = JSON.parse(res.text)
 
@@ -124,7 +124,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 20)
+        .timeout(1000 * 60)
 
       return JSON.parse(res.text)
     } catch (error) {
@@ -141,7 +141,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 20)
+        .timeout(1000 * 60)
 
       const result = JSON.parse(res.text)
 
@@ -178,7 +178,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 20)
+        .timeout(1000 * 60)
 
       const result = JSON.parse(res.text)
 
@@ -197,7 +197,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 20)
+        .timeout(1000 * 60)
 
       const result = JSON.parse(res.text)
 
@@ -216,7 +216,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 20)
+        .timeout(1000 * 60)
 
       const result = JSON.parse(res.text)
 
@@ -267,7 +267,7 @@ class Umeng {
   async summary(appKey) {
     try {
       const link = format(Umeng.Api.summary, appKey)
-      const res = await superagent.get(link).timeout(1000 * 20)
+      const res = await superagent.get(link).timeout(1000 * 60)
       return JSON.parse(res.text)
     } catch (error) {
       throw error
@@ -299,7 +299,7 @@ class Umeng {
           version: [],
           relatedId: appKey
         })
-        .timeout(1000 * 20)
+        .timeout(1000 * 60)
 
       const result = JSON.parse(res.text)
 
@@ -340,7 +340,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 20)
+        .timeout(1000 * 60)
 
       const result = JSON.parse(res.text)
 
