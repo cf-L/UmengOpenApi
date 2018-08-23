@@ -227,28 +227,28 @@ class Umeng {
   }
 
   async newUsers(appKey, start, end, parameters) {
-    if (period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
+    if (parameters.period && parameters.period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
       throw Error('Unsupported period!')
     }
     return await this._appData(Umeng.Api.data.newUsers, appKey, start, end, parameters)
   }
 
   async activeUsers(appKey, start, end, parameters) {
-    if (period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
+    if (parameters.period && parameters.period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
       throw Error('Unsupported period!')
     }
     return await this._appData(Umeng.Api.data.activeUsers, appKey, start, end, parameters)
   }
 
   async launches(appKey, start, end, parameters) {
-    if (period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
+    if (parameters.period && parameters.period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
       throw Error('Unsupported period!')
     }
     return await this._appData(Umeng.Api.data.launches, appKey, start, end, parameters)
   }
 
   async retentions(appKey, start, end, parameters) {
-    if (period === Umeng.UMENGPERIOD.HOURLY || period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
+    if (parameters.period && (parameters.period === Umeng.UMENGPERIOD.HOURLY || parameters.period === Umeng.UMENGPERIOD.DAILYPERLAUNCH)) {
       throw Error('Unsupported period!')
     }
 
@@ -256,7 +256,7 @@ class Umeng {
   }
 
   async durations(appKey, start, end, parameters) {
-    if (period === Umeng.UMENGPERIOD.DAILY || period === Umeng.UMENGPERIOD.DAILYPERLAUNCH) {
+    if (parameters.period && (parameters.period === Umeng.UMENGPERIOD.DAILY || parameters.period === Umeng.UMENGPERIOD.DAILYPERLAUNCH)) {
       return await this._appData(Umeng.Api.data.durations, appKey, start, end, parameters)
     } else {
       throw Error('Unsupported period!')
