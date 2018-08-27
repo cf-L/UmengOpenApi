@@ -5,8 +5,10 @@ const Umeng = require('./index')
 
 async function test() {
   const umeng = new Umeng('email', 'password')
-  const result = await umeng.trend('appKey', 'fromDate', 'toDate', Umeng.TRENDVIEW.NEWUSERS)
-  console.log(result)
+  for (let i = 0; i < 20; i++) {
+    const result = await umeng.newUsers('appkey', '2018-08-22', '2018-08-27')
+    console.log('result: ', JSON.stringify(result))
+  }
 }
 
 test()
