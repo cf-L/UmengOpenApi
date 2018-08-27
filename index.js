@@ -36,7 +36,8 @@ class Umeng {
       },
       feedback: '/feedbacks',
       summary: 'http://mobile.umeng.com/ht/api/v3/app/whole/summary?view=summary&relatedId=%s',
-      retentionsDetail: 'http://mobile.umeng.com/ht/api/v3/app/retention/view?relatedId=%s'
+      retentionsDetail: 'http://mobile.umeng.com/ht/api/v3/app/retention/view?relatedId=%s',
+      trend: 'http://mobile.umeng.com/ht/api/v3/app/whole/trend?relatedId=%s'
     }
   }
 
@@ -61,6 +62,19 @@ class Umeng {
         WEEKLY: 'week',
         MONTHLY: 'month'
       }
+    }
+  }
+
+  static get TRENDVIEW() {
+    return {
+      NEWUSERS: 'trend_new_users',
+      ACTIVEUSERS: 'trend_active_users',
+      LAUNCHES: 'trend_launches',
+      INSTALLATIONS: 'trend_installations',
+      MORROWRETENTION: 'trend_morrow_retention',
+      AVGDURATION: 'trend_avg_duration',
+      DAILYAVGDURATION: 'trend_daily_avg_duration',
+      DAILYAVGLAUNCHES: 'trend_daily_avg_launches'
     }
   }
 
@@ -309,6 +323,41 @@ class Umeng {
         const message = result.sMsg || result.msg || 'Unknow error'
         throw Error(message)
       }
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async trend(appKey, fromDate, toDate, view) {
+    try {
+      const cookie = await this.getCookie()
+      if (!cookie) { return null }
+
+      const link = format(Umeng.Api.trend, appKey)
+      const res = await superagent.post(link)
+        .set('Cookie', cookie)
+        .send({
+          fromDate: fromDate,
+          toDate: toDate,
+          timeUnit: 'day',
+          view: view,
+          relatedId: appKey
+        })
+
+      const result = JSON.parse(res.text)
+      const obj = {}
+
+      if (result.data && result.data.dates && result.data.items && result.data.items.length > 0) {
+        const dates = result.data.dates
+        const items = result.data.items[0].data
+        if (items && dates.length === items.length) {
+          for (let i = 0; i < dates.length; i++) {
+            obj[dates[i]] = items[i]
+          }
+        }
+      }
+
+      return obj
     } catch (error) {
       throw error
     }
