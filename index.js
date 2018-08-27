@@ -349,7 +349,7 @@ class Umeng {
 
       if (result.data && result.data.dates && result.data.items && result.data.items.length > 0) {
         const dates = result.data.dates
-        const items = result.data.items[0].data
+        const items = view === Umeng.TRENDVIEW.MORROWRETENTION ? result.data.items[1].data : result.data.items[0].data
         if (items && dates.length === items.length) {
           for (let i = 0; i < dates.length; i++) {
             obj[dates[i]] = items[i]
