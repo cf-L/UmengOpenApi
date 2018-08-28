@@ -37,7 +37,13 @@ class Umeng {
       feedback: '/feedbacks',
       summary: 'http://mobile.umeng.com/ht/api/v3/app/whole/summary?view=summary&relatedId=%s',
       retentionsDetail: 'http://mobile.umeng.com/ht/api/v3/app/retention/view?relatedId=%s',
-      trend: 'http://mobile.umeng.com/ht/api/v3/app/whole/trend?relatedId=%s'
+      trend: 'http://mobile.umeng.com/ht/api/v3/app/whole/trend?relatedId=%s',
+      v3: {
+        app: {
+          trend: 'http://mobile.umeng.com/ht/api/v3/app/user/%s/trend?relatedId=%s',
+          detail: 'http://mobile.umeng.com/ht/api/v3/app/user/%s/detail?relatedId=%s'
+        }
+      }
     }
   }
 
@@ -75,6 +81,18 @@ class Umeng {
       AVGDURATION: 'trend_avg_duration',
       DAILYAVGDURATION: 'trend_daily_avg_duration',
       DAILYAVGLAUNCHES: 'trend_daily_avg_launches'
+    }
+  }
+
+  static get V3() {
+    return {
+      APP: {
+        USER: {
+          NEW: { KEY: 'new', VALUE: 'newUser' },
+          ACTIVE: { KEY: 'active', VALUE: 'activeUser' },
+          LAUNCH: { KEY: 'launch', VALUE: 'launch' }
+        }
+      }
     }
   }
 
@@ -394,6 +412,83 @@ class Umeng {
       const result = JSON.parse(res.text)
 
       return result
+    } catch (error) {
+      throw error
+    }
+  }
+
+  get v3() {
+    return {
+      app: {
+        trend: {
+          newUser: async(appKey, startDate, endDate, version) => {
+            return await this._v3_app_trend(Umeng.V3.APP.USER.NEW, appKey, startDate, endDate, version)
+          },
+          activeUser: async(appKey, startDate, endDate, version) => {
+            return await this._v3_app_trend(Umeng.V3.APP.USER.ACTIVE, appKey, startDate, endDate, version)
+          },
+          launch: async(appKey, startDate, endDate, version) => {
+            return await this._v3_app_trend(Umeng.V3.APP.USER.LAUNCH, appKey, startDate, endDate, version)
+          }
+        },
+        detail: {
+          newUser: async(appKey, startDate, endDate, version, page, pageSize) => {
+            return await this._v3_app_detail(Umeng.V3.APP.USER.NEW, appKey, startDate, endDate, version, page, pageSize)
+          },
+          activeUser: async(appKey, startDate, endDate, version) => {
+            return await this._v3_app_detail(Umeng.V3.APP.USER.ACTIVE, appKey, startDate, endDate, version, page, pageSize)
+          },
+          launch: async(appKey, startDate, endDate, version) => {
+            return await this._v3_app_detail(Umeng.V3.APP.USER.LAUNCH, appKey, startDate, endDate, version, page, pageSize)
+          }
+        }
+      }
+    }
+  }
+
+  async _v3_app_trend(type, appKey, startDate, endDate, version) {
+    try {
+      const link = format(Umeng.Api.v3.app.trend, type.KEY, appKey)
+      const cookie = await this.getCookie()
+      const res = await superagent.post(link)
+        .set('Cookie', cookie)
+        .send({
+          channel: [],
+          fromDate: startDate,
+          toDate: endDate,
+          timeUnit: 'day',
+          version: version || [],
+          view: type.VALUE,
+          relatedId: appKey
+        })
+
+      const result = JSON.parse(res.text)
+      return result.data || {}
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async _v3_app_detail(type, appKey, startDate, endDate, version, page, pageSize) {
+    try {
+      const link = format(Umeng.Api.v3.app.detail, type.KEY, appKey)
+      const cookie = await this.getCookie()
+      const res = await superagent.post(link)
+        .set('Cookie', cookie)
+        .send({
+          channel: [],
+          fromDate: startDate,
+          toDate: endDate,
+          timeUnit: 'day',
+          version: version || [],
+          view: type.VALUE,
+          page: page,
+          pageSize: pageSize,
+          relatedId: appKey
+        })
+
+      const result = JSON.parse(res.text)
+      return result.data || {}
     } catch (error) {
       throw error
     }

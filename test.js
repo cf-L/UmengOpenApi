@@ -5,10 +5,8 @@ const Umeng = require('./index')
 
 async function test() {
   const umeng = new Umeng('email', 'password')
-  for (let i = 0; i < 20; i++) {
-    const result = await umeng.newUsers('appkey', '2018-08-22', '2018-08-27')
-    console.log('result: ', JSON.stringify(result))
-  }
+  const result = await umeng.v3.app.detail.newUser('appKey', '2018-08-21', '2018-08-28', [], 1, 10000)
+  console.log(result)
 }
 
 test()
