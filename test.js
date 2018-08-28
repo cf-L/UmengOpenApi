@@ -5,7 +5,7 @@ const Umeng = require('./index')
 
 async function test() {
   const umeng = new Umeng('email', 'password')
-  const result = await umeng.v3.app.detail.newUser('appKey', '2018-08-21', '2018-08-28', [], 1, 10000)
+  const result = await umeng.avgPage('appKey', '2018-08-27', '2018-08-27')
   console.log(result)
 }
 

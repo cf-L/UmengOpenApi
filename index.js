@@ -38,6 +38,7 @@ class Umeng {
       summary: 'http://mobile.umeng.com/ht/api/v3/app/whole/summary?view=summary&relatedId=%s',
       retentionsDetail: 'http://mobile.umeng.com/ht/api/v3/app/retention/view?relatedId=%s',
       trend: 'http://mobile.umeng.com/ht/api/v3/app/whole/trend?relatedId=%s',
+      pageDetail: 'http://mobile.umeng.com/apps/%s/reports/load_chart_data?start_date=%s&end_date=%s&versions%5B%5D=&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=depth',
       v3: {
         app: {
           trend: 'http://mobile.umeng.com/ht/api/v3/app/user/%s/trend?relatedId=%s',
@@ -412,6 +413,29 @@ class Umeng {
       const result = JSON.parse(res.text)
 
       return result
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async pageDetail(appKey, startDate, endDate) {
+    try {
+      const link = format(Umeng.Api.pageDetail, appKey.split('').reverse().join(''), startDate, endDate)
+      const cookie = await this.getCookie()
+      const res = await superagent.get(link).set('Cookie', cookie)
+      return JSON.parse(res.text)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async avgPage(appKey, startDate, endDate) {
+    try {
+      const result = await this.pageDetail(appKey, startDate, endDate)
+      if (result.summary && result.summary.value) {
+        return result.summary.value
+      }
+      return 0
     } catch (error) {
       throw error
     }
