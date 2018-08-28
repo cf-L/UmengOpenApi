@@ -42,7 +42,8 @@ class Umeng {
       v3: {
         app: {
           trend: 'http://mobile.umeng.com/ht/api/v3/app/user/%s/trend?relatedId=%s',
-          detail: 'http://mobile.umeng.com/ht/api/v3/app/user/%s/detail?relatedId=%s'
+          detail: 'http://mobile.umeng.com/ht/api/v3/app/user/%s/detail?relatedId=%s',
+          retention: 'http://mobile.umeng.com/ht/api/v3/app/retention/trend?relatedId=%s'
         }
       }
     }
@@ -91,7 +92,8 @@ class Umeng {
         USER: {
           NEW: { KEY: 'new', VALUE: 'newUser' },
           ACTIVE: { KEY: 'active', VALUE: 'activeUser' },
-          LAUNCH: { KEY: 'launch', VALUE: 'launch' }
+          LAUNCH: { KEY: 'launch', VALUE: 'launch' },
+          RETENTION: { KEY: 'retention ', VALUE: 'retentionTrend' }
         }
       }
     }
@@ -465,6 +467,30 @@ class Umeng {
           launch: async(appKey, startDate, endDate, version) => {
             return await this._v3_app_detail(Umeng.V3.APP.USER.LAUNCH, appKey, startDate, endDate, version, page, pageSize)
           }
+        },
+        retention: async(appKey, startDate, endDate, version) => {
+          try {
+            const link = format(Umeng.Api.v3.app.retention, appKey)
+            const cookie = await this.getCookie()
+            const res = await superagent.post(link)
+              .set('Cookie', cookie)
+              .send({
+                channle: [],
+                fromDate: startDate,
+                toDate: endDate,
+                version: version || [],
+                view: 'retentionTrend',
+                relatedId: appKey,
+                timeUnit: 'day',
+                index: 0,
+                type: 'newUser'
+              })
+
+            const result = JSON.parse(res.text)
+            return result.data || {}
+          } catch (error) {
+            throw error
+          }
         }
       }
     }
@@ -495,7 +521,7 @@ class Umeng {
 
   async _v3_app_detail(type, appKey, startDate, endDate, version, page, pageSize) {
     try {
-      const link = format(Umeng.Api.v3.app.detail, type.KEY, appKey)
+      const link = format(Umeng.Api.v3.app.detail, appKey)
       const cookie = await this.getCookie()
       const res = await superagent.post(link)
         .set('Cookie', cookie)
