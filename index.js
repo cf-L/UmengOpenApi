@@ -316,15 +316,14 @@ class Umeng {
       const res = await superagent.post(link)
         .send({
           fromDate: start,
-          toDate: end,
-          timeUnit: unit,
           page: page,
           pageSize: limit,
+          relatedId: appKey,
+          timeUnit: unit,
+          toDate: end,
           type: type,
           view: 'retention',
-          channel: [],
-          version: versions || [],
-          relatedId: appKey
+          version: versions || []
         })
         .timeout(1000 * 60)
 
