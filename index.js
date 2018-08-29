@@ -309,7 +309,7 @@ class Umeng {
     }
   }
 
-  async retentionsDetail(appKey, start, end, type, unit, page, limit) {
+  async retentionsDetail(appKey, start, end, type, unit, page, limit, versions) {
     if (!Umeng.RETENTIONS.TYPE[type]) {
       throw Error(`Unsupported type: ${type}`)
     }
@@ -331,7 +331,7 @@ class Umeng {
           type: type,
           view: 'retention',
           channel: [],
-          version: [],
+          version: versions || [],
           relatedId: appKey
         })
         .timeout(1000 * 60)
