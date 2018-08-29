@@ -310,14 +310,6 @@ class Umeng {
   }
 
   async retentionsDetail(appKey, start, end, type, unit, page, limit, versions) {
-    if (!Umeng.RETENTIONS.TYPE[type]) {
-      throw Error(`Unsupported type: ${type}`)
-    }
-
-    if (!Umeng.RETENTIONS.UNIT[unit]) {
-      throw Error(`Unsupported unit: ${unit}`)
-    }
-
     try {
       const link = format(Umeng.Api.retentionsDetail, appKey)
 
