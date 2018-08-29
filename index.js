@@ -39,6 +39,8 @@ class Umeng {
       retentionsDetail: 'http://mobile.umeng.com/ht/api/v3/app/retention/view?relatedId=%s',
       trend: 'http://mobile.umeng.com/ht/api/v3/app/whole/trend?relatedId=%s',
       pageDetail: 'http://mobile.umeng.com/apps/%s/reports/load_chart_data?start_date=%s&end_date=%s&versions%5B%5D=&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=depth',
+      durationDistributed: 'http://mobile.umeng.com/apps/%s/reports/load_table_data?page=1&per_page=30&start_date=%s&end_date=%s&versions%5B%5D=%s&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=duration&stat_type=daily_per_launch',
+      frequencyDistributed: 'http://mobile.umeng.com/apps/%s/reports/load_table_data?page=1&per_page=30&start_date=%s&end_date=%s&versions%5B%5D=%s&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=frequency&stat_type=daily',
       v3: {
         app: {
           trend: 'http://mobile.umeng.com/ht/api/v3/app/user/%s/trend?relatedId=%s',
@@ -429,6 +431,30 @@ class Umeng {
         return result.summary.value
       }
       return 0
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async durationDistributed(appKey, startDate, endDate, version) {
+    try {
+      const reverseAppKey = appKey.split('').reverse().join('')
+      const link = format(Umeng.Api.durationDistributed, reverseAppKey, startDate, endDate, version || '')
+      const cookie = await this.getCookie()
+      const res = await superagent.get(link).set('Cookie', cookie)
+      return JSON.parse(res.text)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async frequencyDistributed(appKey, startDate, endDate, version) {
+    try {
+      const reverseAppKey = appKey.split('').reverse().join('')
+      const link = format(Umeng.Api.frequencyDistributed, reverseAppKey, startDate, endDate, version || '')
+      const cookie = await this.getCookie()
+      const res = await superagent.get(link).set('cookie', cookie)
+      return JSON.parse(res.text)
     } catch (error) {
       throw error
     }
