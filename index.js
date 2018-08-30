@@ -37,6 +37,7 @@ class Umeng {
       feedback: '/feedbacks',
       summary: 'http://mobile.umeng.com/ht/api/v3/app/whole/summary?view=summary&relatedId=%s',
       retentionsDetail: 'http://mobile.umeng.com/ht/api/v3/app/retention/view?relatedId=%s',
+      retentionsTrend: 'http://mobile.umeng.com/ht/api/v3/app/retention/trend?relatedId=%s',
       trend: 'http://mobile.umeng.com/ht/api/v3/app/whole/trend?relatedId=%s',
       pageDetail: 'http://mobile.umeng.com/apps/%s/reports/load_chart_data?start_date=%s&end_date=%s&versions%5B%5D=&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=depth',
       durationDistributed: 'http://mobile.umeng.com/apps/%s/reports/load_table_data?page=1&per_page=30&start_date=%s&end_date=%s&versions%5B%5D=%s&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=duration&stat_type=daily_per_launch',
@@ -314,8 +315,10 @@ class Umeng {
   async retentionsDetail(appKey, start, end, type, unit, page, limit, versions) {
     try {
       const link = format(Umeng.Api.retentionsDetail, appKey)
+      const cookie = await this.getCookie()
 
       const res = await superagent.post(link)
+        .set('cookie', cookie)
         .send({
           fromDate: start,
           page: page,
@@ -328,6 +331,38 @@ class Umeng {
           version: versions || []
         })
         .timeout(1000 * 60)
+
+      const result = JSON.parse(res.text)
+
+      if (result.sCode && result.sCode === 200) {
+        return result.data
+      } else {
+        const message = result.sMsg || result.msg || 'Unknow error'
+        throw Error(message)
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async retentionsTrends(appKey, start, end, type, unit, versions) {
+    try {
+      const link = format(Umeng.Api.retentionsTrend, appKey)
+      const cookie = await this.getCookie()
+
+      const res = await superagent.post(link)
+        .set('cookie', cookie)
+        .send({
+          channel: [],
+          fromDate: start,
+          index: 0,
+          relatedId: appKey,
+          timeUnit: unit,
+          toDate: end,
+          type: type,
+          version: versions || [],
+          view: 'retentionTrend'
+        })
 
       const result = JSON.parse(res.text)
 
