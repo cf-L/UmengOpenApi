@@ -39,9 +39,11 @@ class Umeng {
       retentionsDetail: 'http://mobile.umeng.com/ht/api/v3/app/retention/view?relatedId=%s',
       retentionsTrend: 'http://mobile.umeng.com/ht/api/v3/app/retention/trend?relatedId=%s',
       trend: 'http://mobile.umeng.com/ht/api/v3/app/whole/trend?relatedId=%s',
-      pageDetail: 'http://mobile.umeng.com/apps/%s/reports/load_chart_data?start_date=%s&end_date=%s&versions%5B%5D=&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=depth',
+      pageDetail: 'http://mobile.umeng.com/apps/%s/reports/load_chart_data?start_date=%s&end_date=%s&versions%5B%5D=%s&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=depth',
       durationDistributed: 'http://mobile.umeng.com/apps/%s/reports/load_table_data?page=1&per_page=30&start_date=%s&end_date=%s&versions%5B%5D=%s&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=duration&stat_type=daily_per_launch',
       frequencyDistributed: 'http://mobile.umeng.com/apps/%s/reports/load_table_data?page=1&per_page=30&start_date=%s&end_date=%s&versions%5B%5D=%s&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=frequency&stat_type=daily',
+      avgDuration: 'https://mobile.umeng.com/apps/%s/reports/load_chart_data?start_date=%s&end_date=%s&versions%5B%5D=%s&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=duration&stat_type=%s',
+      avgDailyLaunches: 'https://mobile.umeng.com/apps/%s/reports/load_chart_data?start_date=%s&end_date=%s&versions%5B%5D=%s&channels%5B%5D=&segments%5B%5D=&time_unit=daily&stats=frequency&stat_type=daily',
       v3: {
         app: {
           trend: 'http://mobile.umeng.com/ht/api/v3/app/user/%s/trend?relatedId=%s',
@@ -448,9 +450,10 @@ class Umeng {
     }
   }
 
-  async pageDetail(appKey, startDate, endDate) {
+  async pageDetail(appKey, startDate, endDate, version) {
     try {
-      const link = format(Umeng.Api.pageDetail, appKey.split('').reverse().join(''), startDate, endDate)
+      const link = format(Umeng.Api.pageDetail, appKey.split('').reverse().join(''), startDate, endDate, version || '')
+      console.log(link)
       const cookie = await this.getCookie()
       const res = await superagent.get(link).set('Cookie', cookie)
       return JSON.parse(res.text)
@@ -459,9 +462,10 @@ class Umeng {
     }
   }
 
-  async avgPage(appKey, startDate, endDate) {
+  async avgPage(appKey, startDate, endDate, version) {
     try {
-      const result = await this.pageDetail(appKey, startDate, endDate)
+      const result = await this.pageDetail(appKey, startDate, endDate, version)
+      console.log(result)
       if (result.summary && result.summary.value) {
         return result.summary.value
       }
@@ -490,6 +494,30 @@ class Umeng {
       const cookie = await this.getCookie()
       const res = await superagent.get(link).set('cookie', cookie)
       return JSON.parse(res.text)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async avgSingleUseDuration(appKey, date, version) {
+    return this._avgDuration('daily_per_launch', appKey, date, version)
+  }
+
+  async avgDailyUsageDuration(appKey, date, version) {
+    return this._avgDuration('daily', appKey, date, version)
+  }
+
+  async avgDailyLaunches(appKey, date, version) {
+    try {
+      const reverseKey = appKey.split('').reverse().join('')
+      const link = format(Umeng.Api.avgDailyLaunches, reverseKey, date, date, version)
+      const cookie = await this.getCookie()
+      const res = await superagent.get(link).set('cookie', cookie)
+      const result = JSON.parse(res.text)
+      if (result.summary && result.summary.value) {
+        return result.summary.value
+      }
+      return 0
     } catch (error) {
       throw error
     }
@@ -591,6 +619,22 @@ class Umeng {
 
       const result = JSON.parse(res.text)
       return result.data || {}
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async _avgDuration(type, appKey, date, version) {
+    try {
+      const reverseKey = appKey.split('').reverse().join('')
+      const link = format(Umeng.Api.avgDuration, reverseKey, date, date, version, type)
+      const cookie = await this.getCookie()
+      const res = await superagent.get(link).set('cookie', cookie)
+      const result = JSON.parse(res.text)
+      if (result.summary && result.summary.value) {
+        return result.summary.value
+      }
+      return '00:00:00'
     } catch (error) {
       throw error
     }
