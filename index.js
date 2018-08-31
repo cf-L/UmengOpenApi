@@ -6,6 +6,8 @@ const Cookie = require('./lib/cookie')
 const superagent = require('superagent')
 const format = require('util').format
 
+const timeout = 1000 * 60 * 30
+
 class Umeng {
   static get Api() {
     return {
@@ -133,7 +135,7 @@ class Umeng {
 
       await Restrict.wait()
       const link = this.host + '/authorize'
-      const res = await superagent.post(link)
+      const res = await superagent.post(link).timeout(timeout)
         .send({
           email: this.email,
           password: this.password
@@ -164,7 +166,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 60)
+        .timeout(timeout)
 
       return JSON.parse(res.text)
     } catch (error) {
@@ -181,7 +183,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 60)
+        .timeout(timeout)
 
       const result = JSON.parse(res.text)
 
@@ -202,7 +204,7 @@ class Umeng {
       }
 
       await Restrict.wait()
-      const res = await superagent.get(link).auth(this.email, this.password)
+      const res = await superagent.get(link).auth(this.email, this.password).timeout(timeout)
       return JSON.parse(res.text)
     } catch (error) {
       throw error
@@ -218,7 +220,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 60)
+        .timeout(timeout)
 
       const result = JSON.parse(res.text)
 
@@ -237,7 +239,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 60)
+        .timeout(timeout)
 
       const result = JSON.parse(res.text)
 
@@ -256,7 +258,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 60)
+        .timeout(timeout)
 
       const result = JSON.parse(res.text)
 
@@ -307,7 +309,7 @@ class Umeng {
   async summary(appKey) {
     try {
       const link = format(Umeng.Api.summary, appKey)
-      const res = await superagent.get(link).timeout(1000 * 60)
+      const res = await superagent.get(link).timeout(timeout)
       return JSON.parse(res.text)
     } catch (error) {
       throw error
@@ -332,7 +334,7 @@ class Umeng {
           view: 'retention',
           version: versions || []
         })
-        .timeout(1000 * 60)
+        .timeout(timeout)
 
       const result = JSON.parse(res.text)
 
@@ -365,6 +367,7 @@ class Umeng {
           version: versions || [],
           view: 'retentionTrend'
         })
+        .timeout(timeout)
 
       const result = JSON.parse(res.text)
 
@@ -394,6 +397,7 @@ class Umeng {
           view: view,
           relatedId: appKey
         })
+        .timeout(timeout)
 
       const result = JSON.parse(res.text)
       const obj = {}
@@ -440,7 +444,7 @@ class Umeng {
 
       const res = await superagent.get(link)
         .auth(this.email, this.password)
-        .timeout(1000 * 60)
+        .timeout(timeout)
 
       const result = JSON.parse(res.text)
 
@@ -453,9 +457,8 @@ class Umeng {
   async pageDetail(appKey, startDate, endDate, version) {
     try {
       const link = format(Umeng.Api.pageDetail, appKey.split('').reverse().join(''), startDate, endDate, version || '')
-      console.log(link)
       const cookie = await this.getCookie()
-      const res = await superagent.get(link).set('Cookie', cookie)
+      const res = await superagent.get(link).set('Cookie', cookie).timeout(timeout)
       return JSON.parse(res.text)
     } catch (error) {
       throw error
@@ -465,7 +468,6 @@ class Umeng {
   async avgPage(appKey, startDate, endDate, version) {
     try {
       const result = await this.pageDetail(appKey, startDate, endDate, version)
-      console.log(result)
       if (result.summary && result.summary.value) {
         return result.summary.value
       }
@@ -480,7 +482,7 @@ class Umeng {
       const reverseAppKey = appKey.split('').reverse().join('')
       const link = format(Umeng.Api.durationDistributed, reverseAppKey, startDate, endDate, version || '')
       const cookie = await this.getCookie()
-      const res = await superagent.get(link).set('Cookie', cookie)
+      const res = await superagent.get(link).set('Cookie', cookie).timeout(timeout)
       return JSON.parse(res.text)
     } catch (error) {
       throw error
@@ -492,7 +494,7 @@ class Umeng {
       const reverseAppKey = appKey.split('').reverse().join('')
       const link = format(Umeng.Api.frequencyDistributed, reverseAppKey, startDate, endDate, version || '')
       const cookie = await this.getCookie()
-      const res = await superagent.get(link).set('cookie', cookie)
+      const res = await superagent.get(link).set('cookie', cookie).timeout(timeout)
       return JSON.parse(res.text)
     } catch (error) {
       throw error
@@ -512,7 +514,7 @@ class Umeng {
       const reverseKey = appKey.split('').reverse().join('')
       const link = format(Umeng.Api.avgDailyLaunches, reverseKey, date, date, version)
       const cookie = await this.getCookie()
-      const res = await superagent.get(link).set('cookie', cookie)
+      const res = await superagent.get(link).set('cookie', cookie).timeout(timeout)
       const result = JSON.parse(res.text)
       if (result.summary && result.summary.value) {
         return result.summary.value
@@ -565,6 +567,7 @@ class Umeng {
                 index: 0,
                 type: 'newUser'
               })
+              .timeout(timeout)
 
             const result = JSON.parse(res.text)
             return result.data || {}
@@ -580,7 +583,7 @@ class Umeng {
     try {
       const link = format(Umeng.Api.v3.app.trend, type.KEY, appKey)
       const cookie = await this.getCookie()
-      const res = await superagent.post(link)
+      const res = await superagent.post(link).timeout(timeout)
         .set('Cookie', cookie)
         .send({
           channel: [],
@@ -603,7 +606,7 @@ class Umeng {
     try {
       const link = format(Umeng.Api.v3.app.detail, appKey)
       const cookie = await this.getCookie()
-      const res = await superagent.post(link)
+      const res = await superagent.post(link).timeout(timeout)
         .set('Cookie', cookie)
         .send({
           channel: [],
@@ -629,7 +632,7 @@ class Umeng {
       const reverseKey = appKey.split('').reverse().join('')
       const link = format(Umeng.Api.avgDuration, reverseKey, date, date, version, type)
       const cookie = await this.getCookie()
-      const res = await superagent.get(link).set('cookie', cookie)
+      const res = await superagent.get(link).set('cookie', cookie).timeout(timeout)
       const result = JSON.parse(res.text)
       if (result.summary && result.summary.value) {
         return result.summary.value
