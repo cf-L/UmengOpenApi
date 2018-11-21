@@ -308,8 +308,9 @@ class Umeng {
 
   async summary(appKey) {
     try {
+      const cookie = await this.getCookie()
       const link = format(Umeng.Api.summary, appKey)
-      const res = await superagent.get(link).timeout(timeout)
+      const res = await superagent.get(link).set('cookie', cookie).timeout(timeout)
       return JSON.parse(res.text)
     } catch (error) {
       throw error
