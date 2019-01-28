@@ -1,6 +1,6 @@
 {
   "name": "softin-umeng-open-api",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "Umeng Open Api",
   "main": "index.js",
   "scripts": {

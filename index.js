@@ -435,12 +435,15 @@ class Umeng {
       await Restrict.wait()
       let link = this.host + api + `?appkey=${appKey}&start_date=${start}&end_date=${end}`
 
-      if (parameters && parameters.period) {
-        link += `&period_type=${parameters.period}`
+      const options = parameters || {}
+      options.period = options.period || Umeng.UMENGPERIOD.DAILY
+
+      if (options && options.period) {
+        link += `&period_type=${options.period}`
       }
 
-      if (parameters && parameters.versions) {
-        link += `&versions=${parameters.versions}`
+      if (options && options.versions) {
+        link += `&versions=${options.versions}`
       }
 
       const res = await superagent.get(link)
